@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html pageEncoding="UTF-8">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link type="text/css" rel="styleSheet" href="./css/bootstrap.min.css" />
+    <script src="./js/jquery-3.5.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <style>
+        body {
+            padding: 10px;
+            background-color: antiquewhite;
+        }
+
+        .item-title {
+            text-align: center;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            font-size: 18px;
+        }
+
+        #result-show {
+            padding-left: 12px;
+            padding-right: 12px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+
+        <!-- 路由器配置 -->
+        <div class="col-md-4 col-md-offset-1">
+            <div class="item-title">路由器</div>
+            <form>
+                <div class="form-group">
+                    <label>IP地址</label>
+                    <input class="form-control" id="host_ip_router">
+                </div>
+                <div class="form-group">
+                    <label>Login密码</label>
+                    <input class="form-control" id="password_login_router">
+                </div>
+                <div class="form-group">
+                    <label>Enable密码</label>
+                    <input class="form-control" id="password_enable_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-1</label>
+                    <input class="form-control" id="gateway1_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-1对应的Mask</label>
+                    <input class="form-control" id="mask1_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-1对应的VLan</label>
+                    <input class="form-control" id="vlan1_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-2</label>
+                    <input class="form-control" id="gateway2_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-2对应的Mask</label>
+                    <input class="form-control" id="mask2_router">
+                </div>
+                <div class="form-group">
+                    <label>Gateway-2对应的VLan</label>
+                    <input class="form-control" id="vlan2_router">
+                </div>
+                <div class="submit-btn"><button id="config-router" type="button" class="btn btn-default">配置路由器</button>
+                </div>
+        </div>
+
+        <!-- 交换机配置 -->
+        <div class="col-md-4 col-md-offset-1">
+            <div class="item-title">交换机</div>
+            <form>
+                <div class="form-group">
+                    <label>IP地址</label>
+                    <input class="form-control" id="host_ip_switch">
+                </div>
+                <div class="form-group">
+                    <label>Login密码</label>
+                    <input class="form-control" id="password_login_switch">
+                </div>
+                <div class="form-group">
+                    <label>Enable密码</label>
+                    <input class="form-control" id="password_enable_switch">
+                </div>
+                <div class="form-group">
+                    <label>VLan-1对应的接口</label>
+                    <input class="form-control" id="vlan1_switch">
+                </div>
+                <div class="form-group">
+                    <label>VLan-1对应的接口</label>
+                    <input class="form-control" id="interface1_switch">
+                </div>
+                <div class="form-group">
+                    <label>VLan-2</label>
+                    <input class="form-control" id="vlan2_switch">
+                </div>
+                <div class="form-group">
+                    <label>VLan-2对应的接口</label>
+                    <input class="form-control" id="interface2_switch">
+                </div>
+                <div class="form-group">
+                    <label>路由器与交换机连接的接口</label>
+                    <input class="form-control" id="interface_router_switch">
+                </div>
+                <div class="submit-btn"><button id="config-switch" type="button" class="btn btn-default">配置交换机</button>
+                </div>
+        </div>
+
+        <!-- 结果显示 -->
+        <div class="modal fade" id="result-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="form-body">
+                        <div id="result-show"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        var ip = "http://localhost:8080"
+
+        function existEmpty(obj) {
+            var existEmpty = false
+            Object.keys(obj).forEach(key => {
+                if(obj[key] === "") {
+                    existEmpty = true
+                }
+            })
+            return existEmpty
+        }
+
+        $("#config-router").click(event => {
+            var host_ip = $("#host_ip_router").val()
+            var password_login = $("#password_login_router").val()
+            var password_enable = $("#password_enable_router").val()
+            var gateway1 = $("#gateway1_router").val()
+            var mask1 = $("#mask1_router").val()
+            var vlan1 = $("#vlan1_router").val()
+            var gateway2 = $("#gateway2_router").val()
+            var mask2 = $("#mask2_router").val()
+            var vlan2 = $("#vlan2_router").val()
+            var data = {
+                host_ip: host_ip,
+                password_login: password_login,
+                password_enable: password_enable,
+                gateway1: gateway1,
+                mask1: mask1,
+                vlan1: vlan1,
+                gateway2: gateway2,
+                mask2: mask2,
+                vlan2: vlan2
+            }
+            
+            if(existEmpty(data)) {
+                alert("请把信息填写完整")
+                return
+            }
+            $.post(ip + "/api/setRouter", data, res => {
+                $("#result-show").text(res)
+                $("#result-modal").modal('show')
+            })
+        })
+
+        $("#config-switch").click(event => {
+            var host_ip = $("#host_ip_switch").val()
+            var password_login = $("#password_login_switch").val()
+            var password_enable = $("#password_enable_switch").val()
+            var vlan1 = $("#vlan1_switch").val()
+            var interface1 = $("#interface1_switch").val()
+            var vlan2 = $("#vlan2_switch").val()
+            var interface2 = $("#interface2_switch").val()
+            var interface_router = $("#interface_router_switch").val()
+            var data = {
+                host_ip: host_ip,
+                password_login: password_login,
+                password_enable: password_enable,
+                vlan1: vlan1,
+                interface1: interface1,
+                vlan2: vlan2,
+                interface2: interface2,
+                interface_router: interface_router
+            }
+            if(existEmpty(data)) {
+                alert("请把信息填写完整")
+                return
+            }
+            $.post(ip + "/api/setSwitch", data, res => {
+                $("#result-show").text(res)
+                $("#result-modal").modal('show')
+            })
+        })
+
+    </script>
+</body>
+
+</html>
